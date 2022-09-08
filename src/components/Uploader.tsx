@@ -7,53 +7,106 @@ import React, {
   ChangeEvent
 } from "react";
 import "./../styles/Template.scss";
-
+import axios from "axios";
+import reactLogo from "./../assets/react.svg";
+import saveAs from "save-as";
+import JSZip from "JSZip";
+import JSZipUtils from "jszip-utils";
 type Props = {};
 
 export default (props: Props) => {
   const {} = props;
-  const textRef = useRef(null);
   const [base64Data, setBase64Data] = useState<string[]>([]);
+  const [urlList, setUrlList] = useState<string[]>([]);
+  const [fileCount, setFileCount] = useState<number>(0);
+  
 
-  useEffect(() => {
-    if (base64Data.length) {
-      const obj = {
-        dataList: base64Data,
-        dataLength: base64Data.length
-      };
-      // const content = JSON.stringify(base64Data)
-      const content = JSON.stringify(base64Data);
-      // console.log('content', content)
-      let a = document.createElement("a");
-      let file = new Blob([content], { type: "text/json" });
-      a.href = URL.createObjectURL(file);
-      a.download = `eventLog_${"searchTimeFileName"}.json`;
-      a.click();
+  function processFile(file: File, tempUrlList: string[]) {
+    if (!file) {
+      return;
     }
-  }, [base64Data]);
+    console.log(file);
 
-  const handleFileSelect = (evt: any) => {
-    console.log("evt", evt);
-    var fileList = [...evt.target.files];
-    const tempData = [...base64Data];
-    fileList.forEach((eachFile: File) => {
-      var reader = new FileReader();
-      reader.readAsBinaryString(eachFile);
-      reader.onload = (function (theFile) {
-        console.log("theFile", theFile);
-        return function (e) {
-          if (!e.target) return;
-          var binaryData: any = e.target.result;
-          //Converting Binary Data to base 64
-          var base64String = window.btoa(binaryData);
-          //showing file converted to base64
-          if (!textRef.current) return;
+    return new Promise<string[]>((resolveOuter, reject) => {
+      // Load the data into an image
+      new Promise(function (resolve, reject) {
+        let rawImage = new Image();
 
-          tempData.push(base64String);
-          setBase64Data(tempData);
-        };
-      })(eachFile);
+        rawImage.addEventListener("load", function () {
+          resolve(rawImage);
+        });
+
+        rawImage.src = URL.createObjectURL(file);
+      })
+        .then(function (rawImage: any) {
+          // Convert image to webp ObjectURL via a canvas blob
+          return new Promise(function (resolve, reject) {
+            let canvas = document.createElement("canvas");
+            let ctx = canvas.getContext("2d");
+            if (!ctx) return;
+            canvas.width = rawImage.width;
+            canvas.height = rawImage.height;
+            ctx.drawImage(rawImage, 0, 0);
+
+            canvas.toBlob(function (blob: any) {
+              resolve(URL.createObjectURL(blob));
+            }, "image/webp");
+          });
+        })
+        .then(function (imageURL) {
+          // Load image for display on the page
+          return new Promise(function (resolve, reject) {
+            let scaledImg = new Image();
+
+            scaledImg.addEventListener("load", function () {
+              resolve({ imageURL, scaledImg });
+            });
+
+            scaledImg.setAttribute("src", imageURL);
+
+            tempUrlList.push(imageURL);
+            setUrlList(tempUrlList);
+            // console.log("imageURL", imageURL);
+            resolveOuter(imageURL);
+          });
+        })
+        .then(async function (data) {
+          // console.log(`${file.name}.webp`, data);
+        });
     });
+  }
+  const handleFileSelect = (evt: any) => {
+    var fileList = [...evt.target.files];
+    const tempUrlList = [...urlList];
+    setFileCount(fileList.length);
+    const results = fileList.map(async (eachFile: File) => {
+      const res = await processFile(eachFile, tempUrlList);
+      return res;
+    });
+
+    var zip = new JSZip();
+    var count = 0;
+    var zipFilename = "zipFilename.zip";
+
+    console.log("results", results);
+    results.forEach((item,index)=>{
+      var filename = `filename-${index + 1}.jpg`;
+      return item.then((blobUrl)=>{
+        JSZipUtils.getBinaryContent(blobUrl, function (err, data) {
+          if (err) {
+            throw err; // or handle the error
+          }
+          zip.file(filename, data, { binary: true });
+          count++;
+          if (count == results.length) {
+              zip.generateAsync({ type: "blob" }).then(function (content) {
+                saveAs(content, zipFilename);
+              });
+
+          }
+        });
+      })
+    })
   };
 
   return (
@@ -66,8 +119,12 @@ export default (props: Props) => {
         accept="image/*"
         onChange={(evt) => handleFileSelect(evt)}
       />
-      <br />
-      <textarea id="base64" rows={5} ref={textRef}></textarea>
+
+      <div className="parent">
+        <div id="origin"></div>
+        <div id="download"></div>
+        <img id="iii" src={reactLogo}></img>
+      </div>
     </div>
   );
 };
