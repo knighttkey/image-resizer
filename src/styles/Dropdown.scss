@@ -1,0 +1,99 @@
+.dropdown_container {
+    position: relative;
+    .dropdown_bg {
+      width: 100%;
+      height: 100%;
+      // background-color:#f6fc4260;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 5;
+      &.show_bg {
+
+      }
+      &.hide_bg {
+        opacity: 0;
+        pointer-events: none;
+      }
+    } 
+    .dropdown_body {
+      // width: 30px;
+      height: 30px;
+      margin:0;
+      z-index: 10;
+      position: relative;
+      z-index: 6;
+      .default_area {
+        width: 100%;
+        height: 30px;
+        background-color: #c7c7c7;
+        // color: var(--main);
+        display: flex;
+        align-items: center;
+        border: solid 1px var(--main);
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        line-height: 30px;
+        border-radius: 5px;
+        user-select: none;
+        .icon_area {
+          width: 30px;
+          height: 24px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          border-left: 1px solid var(--main);
+          transition: 0.3s;
+          .arrow_down {
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid var(--main);
+            transition: 0.3s;
+            transform:unset;
+
+            &.unfold {
+              transform:scaleY(-1);
+            }
+          }
+        }
+      }
+      .unfold_area {
+        width: 100%;
+        background-color: #c7c7c7;
+        // color: var(--main);
+        transition: 0.3s;
+        overflow: hidden;
+        transform: scaleY(0);
+        transform-origin: top;
+        margin-top: 6px;
+        border: solid 1px  var(--main);
+        // max-height: 200px;
+        overflow-y: scroll;
+        border-radius: 5px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        user-select: none;
+        // box-sizing: border-box;
+        padding: 5px 0;
+        &.unfold {
+          transform: scaleY(1);
+        }
+        .each_row {
+          width: 100%;
+          cursor: pointer;
+          transition: .3s;
+          &:hover {
+            background-color: var(--main);
+            color: #0c1a2a;
+          }
+        }
+        &::-webkit-scrollbar {
+          display: none;
+        }
+      }
+    }
+  }

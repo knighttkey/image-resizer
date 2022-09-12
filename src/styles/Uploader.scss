@@ -1,3 +1,21 @@
 .uploader_container {
+    .area {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        margin:0 0 20px 0;
+        .title {
+            margin:0 20px 0 0;
+        }
+        &.file_picker_area {
+            .file_picker {
     
+            }
+        }
+        &.zip_file_name_area {
+            .file_name {
+    
+            }
+        }
+    }
 }

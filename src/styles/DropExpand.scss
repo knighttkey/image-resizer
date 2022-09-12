@@ -1,0 +1,114 @@
+.drop_expand_container {
+    position: relative;
+    .dropdown_bg {
+      width: 100%;
+      height: 100%;
+      // background-color:#f6fc4260;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 5;
+      cursor: initial;
+      &.hide_bg {
+        opacity: 0;
+        pointer-events: none;
+      }
+    } 
+    .dropdown_body {
+      // width: 30px;
+      margin:0;
+      z-index: 10;
+      position: relative;
+      z-index: 6;
+      display: flex;
+      // display: flex;
+      .default_area {
+        min-width: 60px;
+        height: 30px;
+        background-color: #c7c7c7;
+        color: var(--main);
+        display: flex;
+        align-items: center;
+        border: solid 1px var(--main);
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        line-height: 30px;
+        border-radius: 5px;
+        user-select: none;
+        .icon_area {
+          // width: 30px;
+          height: 24px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          border-left: 1px solid var(--main);
+          transition: 0.3s;
+          .arrow_down {
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid var(--main);
+            transition: 0.3s;
+            transform:unset;
+
+            &.unfold {
+              transform:scaleY(-1);
+            }
+          }
+        }
+      }
+      .unfold_area {
+        // width: 0;
+        height: 30px;
+        position:absolute;
+        left: 70px;
+        background-color: #c7c7c7;
+        color: var(--main);
+        transition: 0.3s;
+        overflow: hidden;
+        transform: scaleX(0);
+        transform-origin: 0 40px;
+        border: none;
+        overflow-y: scroll;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        user-select: none;
+        pointer-events: none;
+        &.unfold {
+          transform: scaleX(1);
+          // width: unset;
+          pointer-events: auto;
+          border: solid 1px  var(--main);
+        }
+        .each_item {
+          width: 100%;
+          height: 100%;
+          cursor: pointer;
+          transition: .3s;
+          box-sizing: border-box;
+          padding: 0 8px;
+          border-right: dashed 1px var(--main);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          &:hover {
+            background-color: #333;
+            color: #fff;
+          }
+          &:last-child {
+            border-right: none;
+          }
+          &.current_item {
+            background-color: #5c6269;
+            color: #fff;
+          }
+        }
+        &::-webkit-scrollbar {
+          display: none;
+        }
+      }
+    }
+  }
