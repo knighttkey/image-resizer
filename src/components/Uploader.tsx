@@ -151,24 +151,29 @@ export default (props: Props) => {
     //   alert('還是很大 放棄')
     // };
     // if(imageQualityParam <= 0.1) return;
-    if(imageQualityParam <= 0) return;
     if(ratioParam <= 0) return;
+    if(imageQualityParam <= 0) return;
     console.log('__________________imageQualityParam', imageQualityParam)
     console.log('--------------------------------------------------------------')
     let testProcess:any = await processFile(maxFile, format, imageQualityParam, ratioParam);
     console.log('檔案轉換後大小', testProcess.size/1024/1024, 'MB')
     console.log('sizeLimit', sizeLimit)
     if(testProcess.size/1024/1024 > sizeLimit) {
-      console.log('太大了')
+      console.log('over size')
       console.log('imageQualityParam', imageQualityParam)
       
-      if(imageQualityParam === 0.1) {
-        getRecommendQuality(maxFile, formatParam, imageQualityParam,  ratioParam-0.1);
-      } else {
+      // if(imageQualityParam === 0.1) {
+      //   getRecommendQuality(maxFile, formatParam, imageQualityParam,  roundTo(ratioParam-0.1, 1));
+      // } else {
+      //   getRecommendQuality(maxFile, formatParam, roundTo(imageQualityParam-0.1, 1),  ratioParam);
+      // }
+      if(ratioParam === 0.1) {
         getRecommendQuality(maxFile, formatParam, roundTo(imageQualityParam-0.1, 1),  ratioParam);
+      } else {
+        getRecommendQuality(maxFile, formatParam, imageQualityParam,  roundTo(ratioParam-0.1, 1));
       }
     } else {
-      console.log('可以')
+      console.log('ok')
       // setImageQuality(imageQualityParam > 0.1 ? imageQualityParam : 0.1)
       setImageQuality(imageQualityParam)
       setImageWidthRatio(ratioParam)
@@ -302,11 +307,11 @@ export default (props: Props) => {
         </div>
       ) : null}
 
-      <div className="area">
+      <div className="area file_size_limit_area">
           <div className="title">檔案大小限制</div>
           <input
             type="number"
-            className="custom_image_name"
+            className="file_size_limit_input"
             onChange={(e) => setSizeLimit(Number(e.target.value))}
             value={sizeLimit}
             min={0.2}

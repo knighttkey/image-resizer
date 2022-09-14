@@ -1,24 +1,32 @@
 .uploader_container {
-    .area {
-        display: flex;
-        justify-content: flex-start;
-        align-items: center;
-        margin:0 0 20px 0;
-        .title {
-            margin:0 20px 0 0;
-        }
-        &.file_picker_area {
-            .file_picker {
-    
-            }
-        }
-        &.zip_file_name_area {
-            .file_name {
-    
-            }
-        }
-        .unit {
-            margin:0 0 0 10px;
-        }
+  .area {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin: 0 0 20px 0;
+    .title {
+      margin: 0 20px 0 0;
     }
+    &.file_picker_area {
+      .file_picker {
+      }
+    }
+    &.zip_file_name_area {
+      .file_name {
+      }
+    }
+    .unit {
+      margin: 0 0 0 10px;
+    }
+    &.file_size_limit_area {
+      input[type="number"]::-webkit-outer-spin-button,
+      input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      input[type=number] {
+        -moz-appearance: textfield;
+      }
+    }
+  }
 }
