@@ -46,8 +46,6 @@ export default (props: Props) => {
     })[0]
     console.log('maxFile', maxFile)
     return maxFile
-    // return maxFile.size;
-    
   }
 
   function processFile(file: File, formatParam:string, imageQualityParam:number, scaleRatio:number) {
@@ -63,7 +61,6 @@ export default (props: Props) => {
     console.log(file);
 
     return new Promise<string[]>((resolveOuter, reject) => {
-      // Load the data into an image
       new Promise(function (resolve, reject) {
         let rawImage = new Image();
 
@@ -74,7 +71,6 @@ export default (props: Props) => {
         rawImage.src = URL.createObjectURL(file);
       })
         .then(function (rawImage: any) {
-          // console.log("rawImage", rawImage);
           return new Promise(function (resolve, reject) {
             let canvas = document.createElement("canvas");
             let ctx = canvas.getContext("2d");
@@ -91,12 +87,10 @@ export default (props: Props) => {
               `image/${format}`,
               imageQualityParam
             );
-            // canvas.toDataURL("image/webp");
           });
         })
         .then((imageObj:any) => {
           console.log('imageObj', imageObj)
-          // Load image for display on the page
           return new Promise(function (resolve, reject) {
             let scaledImg = new Image();
 
@@ -106,7 +100,6 @@ export default (props: Props) => {
 
             scaledImg.setAttribute("src", imageObj.imageURL as string);
 
-            // console.log("imageURL", imageURL);
             resolveOuter(imageObj);
           });
         })
@@ -121,93 +114,68 @@ export default (props: Props) => {
     console.log("eventfileList", eventfileList);
     setFileCount(eventfileList.length);
     setFileList(eventfileList);
-    let maxFile = getMaxFile(eventfileList)
-    if(!maxFile) return;
-    console.log('maxFile.size', maxFile.size)
-    console.log('maxFile.size/1024_kb', maxFile.size/1024, 'KB')
-    let maxFileProcessResult = maxFile.size/1024/1024;
-    console.log('maxFileProcessResult', maxFileProcessResult, 'MB')
-
-    let aaaa = getRecommendQuality(maxFile, format, imageQuality, 1)
-    console.log('aaaa', aaaa)
-    // if(aaaa > sizeLimit) {
-
-    // }
-    // let testProcessJ = await processFile(maxFile, 'jpeg');
-    // console.log('testProcessJ', testProcessJ)
-    // let testProcessP = await processFile(maxFile, 'png');
-    // console.log('testProcessP', testProcessP)
-    // let testProcessW = await processFile(maxFile, 'webp');
-    // console.log('testProcessW', testProcessW)
     evt.target.value = "";
   };
 
-  const getRecommendQuality = async(maxFile:File, formatParam:string, imageQualityParam:number, ratioParam:number) => {
-    console.log('===============imageQualityParam', imageQualityParam)
-    // if(imageQualityParam === 0.1 && (format === 'jpeg' || format === 'png')) {
-    //   // setFormat('webp');
-    //   getRecommendQuality(maxFile, 'webp', roundTo(imageQualityParam, 1));
-    // } else if(imageQualityParam===0.1 && format === 'webp') {
-    //   alert('還是很大 放棄')
-    // };
-    // if(imageQualityParam <= 0.1) return;
+  const getRecommend = async(thisFile:File, formatParam:string, imageQualityParam:number, ratioParam:number) => {
     if(ratioParam <= 0) return;
     if(imageQualityParam <= 0) return;
-    console.log('__________________imageQualityParam', imageQualityParam)
-    console.log('--------------------------------------------------------------')
-    let testProcess:any = await processFile(maxFile, format, imageQualityParam, ratioParam);
-    console.log('檔案轉換後大小', testProcess.size/1024/1024, 'MB')
-    console.log('sizeLimit', sizeLimit)
-    if(testProcess.size/1024/1024 > sizeLimit) {
-      console.log('over size')
-      console.log('imageQualityParam', imageQualityParam)
-      
-      // if(imageQualityParam === 0.1) {
-      //   getRecommendQuality(maxFile, formatParam, imageQualityParam,  roundTo(ratioParam-0.1, 1));
-      // } else {
-      //   getRecommendQuality(maxFile, formatParam, roundTo(imageQualityParam-0.1, 1),  ratioParam);
-      // }
-      if(ratioParam === 0.1) {
-        getRecommendQuality(maxFile, formatParam, roundTo(imageQualityParam-0.1, 1),  ratioParam);
+    return new Promise<any>(async(resolve, reject) => {
+      let testProcess:any = await processFile(thisFile, format, imageQualityParam, ratioParam);
+      console.log('testProcess', testProcess)
+      console.log('檔案轉換後大小', testProcess.size/1024/1024, 'MB')
+      console.log('sizeLimit', sizeLimit)
+      if(testProcess.size/1024/1024 > sizeLimit) {
+        console.log('over size')
+        if(ratioParam <= 0.5) {
+          resolve(getRecommend(thisFile, formatParam, roundTo(imageQualityParam-0.1, 1),  ratioParam));
+        } else {
+          resolve(getRecommend(thisFile, formatParam, imageQualityParam,  roundTo(ratioParam-0.1, 1)));
+        }
       } else {
-        getRecommendQuality(maxFile, formatParam, imageQualityParam,  roundTo(ratioParam-0.1, 1));
+        console.log('ok')
+        // setImageQuality(imageQualityParam)
+        // setImageWidthRatio(ratioParam)
+        console.log('imageQualityParam', imageQualityParam)
+        console.log('ratioParam', ratioParam)
+        resolve({quality: imageQualityParam, ratio:ratioParam})
+        return {quality: imageQualityParam, ratio:ratioParam};
       }
-    } else {
-      console.log('ok')
-      // setImageQuality(imageQualityParam > 0.1 ? imageQualityParam : 0.1)
-      setImageQuality(imageQualityParam)
-      setImageWidthRatio(ratioParam)
-    }
-    return testProcess;
+      
+    })
+    
   }
 
-  const handleFileResize = () => {
+
+  const handleFileResize = async () => {
     if(!fileList) return;
-    const results = fileList.map(async (eachFile: File) => {
-      const res:any = await processFile(eachFile, format, imageQuality, imageWidthRatio);
-      console.log("res", res);
-      return { blobUrl: res.imageUrl, fileName: eachFile.name };
-    });
+    const results = fileList.map(async(eachFile: File) => {
+      // getRecommend(eachFile, format, imageQuality, imageWidthRatio).then((rrrr)=>{
+      //   console.log('rrrr', rrrr)
+
+      // })
+        const recommend = await getRecommend(eachFile, format, imageQuality, imageWidthRatio)
+          console.log('recommend', recommend)
+          const fileRes:any = await processFile(eachFile, format, recommend.quality, recommend.ratio);
+          console.log('fileRes', fileRes)
+          return { blobUrl: fileRes.imageUrl, fileName: eachFile.name };
+    })
+    
 
     var zip = new JSZip();
     var count = 0;
     var zipFilename = `${zipName}.zip`;
+    console.log('results', results)
 
-    console.log("results", results);
     results.forEach((item, index) => {
-      console.log("___________item", item);
-      return item.then((obj) => {
+      return item.then((obj:any) => {
         // var filename = `${obj.fileName}-${index + 1}.${format}`;
         let fileNameFragment = obj.fileName.split(".");
-        console.log('fileNameFragment', fileNameFragment)
         let originalFilenameExtension = fileNameFragment[fileNameFragment.length-1]
-        console.log('originalFilenameExtension', originalFilenameExtension)
         let filename = `${obj.fileName.replace(originalFilenameExtension, format)}`;
-        console.log("obj", obj);
         JSZipUtils.getBinaryContent(
           obj.blobUrl,
           function (err: any, data: ArrayBuffer) {
-            console.log('=====================data', data)
             if (err) {
               throw err; // or handle the error
             }
@@ -314,7 +282,8 @@ export default (props: Props) => {
             className="file_size_limit_input"
             onChange={(e) => setSizeLimit(Number(e.target.value))}
             value={sizeLimit}
-            min={0.2}
+            step={0.1}
+            min={0.1}
           /> <div className="unit">MB</div>
         </div>
       <button onClick={()=>handleFileResize()}>轉換</button>
