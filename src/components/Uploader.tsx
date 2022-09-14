@@ -29,7 +29,8 @@ export default (props: Props) => {
   const [qualityMenuShow, setQualityMenuShow] = useState<Boolean>(false);
   const [formatMenuShow, setFormatMenuShow] = useState<Boolean>(false);
   const [ruleMenuShow, setRuleMenuShow] = useState<Boolean>(false);
-  const [sizeLimit, setSizeLimit] = useState<number>(1);
+  const [sizeLimit, setSizeLimit] = useState<number>(0.5);
+  const [imageWidthRatio, setImageWidthRatio] = useState<number>(1);
 
   const roundTo = ( num:number, decimal:number ) => { 
       return Math.round( ( num + Number.EPSILON ) * Math.pow( 10, decimal ) )/ Math.pow( 10, decimal ); 
@@ -49,11 +50,12 @@ export default (props: Props) => {
     
   }
 
-  function processFile(file: File, formatParam:string, imageQualityParam:number) {
+  function processFile(file: File, formatParam:string, imageQualityParam:number, scaleRatio:number) {
     console.log('=======================================')
     console.log('file', file)
     console.log('formatParam', formatParam)
     console.log('imageQualityParam', imageQualityParam)
+    console.log('scaleRatio', scaleRatio)
     console.log('=======================================')
     if (!file) {
       return;
@@ -77,9 +79,9 @@ export default (props: Props) => {
             let canvas = document.createElement("canvas");
             let ctx = canvas.getContext("2d");
             if (!ctx) return;
-            canvas.width = rawImage.width;
-            canvas.height = rawImage.height;
-            ctx.drawImage(rawImage, 0, 0);
+            canvas.width = rawImage.width*scaleRatio;
+            canvas.height = rawImage.height*scaleRatio;
+            ctx.drawImage(rawImage, 0, 0, rawImage.width*scaleRatio, rawImage.height*scaleRatio);
 
             canvas.toBlob(
               function (blob: any) {
@@ -87,7 +89,7 @@ export default (props: Props) => {
                 resolve({imageUrl: URL.createObjectURL(blob), size:blob.size, format: format});
               },
               `image/${format}`,
-              imageQuality
+              imageQualityParam
             );
             // canvas.toDataURL("image/webp");
           });
@@ -122,12 +124,12 @@ export default (props: Props) => {
     let maxFile = getMaxFile(eventfileList)
     if(!maxFile) return;
     console.log('maxFile.size', maxFile.size)
-    console.log('maxFile.size/1024_kb', maxFile.size/1024)
-    console.log('maxFile.size/1024/1024_mb', maxFile.size/1024/1024)
+    console.log('maxFile.size/1024_kb', maxFile.size/1024, 'KB')
     let maxFileProcessResult = maxFile.size/1024/1024;
+    console.log('maxFileProcessResult', maxFileProcessResult, 'MB')
 
-    // let aaaa = getRecommendQuality(maxFile, format, imageQuality)
-    // console.log('aaaa', aaaa)
+    let aaaa = getRecommendQuality(maxFile, format, imageQuality, 1)
+    console.log('aaaa', aaaa)
     // if(aaaa > sizeLimit) {
 
     // }
@@ -137,9 +139,10 @@ export default (props: Props) => {
     // console.log('testProcessP', testProcessP)
     // let testProcessW = await processFile(maxFile, 'webp');
     // console.log('testProcessW', testProcessW)
+    evt.target.value = "";
   };
 
-  const getRecommendQuality = async(maxFile:File, formatParam:string, imageQualityParam:number) => {
+  const getRecommendQuality = async(maxFile:File, formatParam:string, imageQualityParam:number, ratioParam:number) => {
     console.log('===============imageQualityParam', imageQualityParam)
     // if(imageQualityParam === 0.1 && (format === 'jpeg' || format === 'png')) {
     //   // setFormat('webp');
@@ -149,20 +152,26 @@ export default (props: Props) => {
     // };
     // if(imageQualityParam <= 0.1) return;
     if(imageQualityParam <= 0) return;
+    if(ratioParam <= 0) return;
     console.log('__________________imageQualityParam', imageQualityParam)
     console.log('--------------------------------------------------------------')
-    let testProcess:any = await processFile(maxFile, format, imageQualityParam);
-    console.log('testProcess', testProcess)
-    console.log('testProcess.size/1024/1024', testProcess.size/1024/1024)
+    let testProcess:any = await processFile(maxFile, format, imageQualityParam, ratioParam);
+    console.log('檔案轉換後大小', testProcess.size/1024/1024, 'MB')
     console.log('sizeLimit', sizeLimit)
     if(testProcess.size/1024/1024 > sizeLimit) {
       console.log('太大了')
       console.log('imageQualityParam', imageQualityParam)
-      getRecommendQuality(maxFile, formatParam, roundTo(imageQualityParam-0.1, 1));
+      
+      if(imageQualityParam === 0.1) {
+        getRecommendQuality(maxFile, formatParam, imageQualityParam,  ratioParam-0.1);
+      } else {
+        getRecommendQuality(maxFile, formatParam, roundTo(imageQualityParam-0.1, 1),  ratioParam);
+      }
     } else {
       console.log('可以')
       // setImageQuality(imageQualityParam > 0.1 ? imageQualityParam : 0.1)
       setImageQuality(imageQualityParam)
+      setImageWidthRatio(ratioParam)
     }
     return testProcess;
   }
@@ -170,7 +179,7 @@ export default (props: Props) => {
   const handleFileResize = () => {
     if(!fileList) return;
     const results = fileList.map(async (eachFile: File) => {
-      const res:any = await processFile(eachFile, format, imageQuality);
+      const res:any = await processFile(eachFile, format, imageQuality, imageWidthRatio);
       console.log("res", res);
       return { blobUrl: res.imageUrl, fileName: eachFile.name };
     });
@@ -293,7 +302,7 @@ export default (props: Props) => {
         </div>
       ) : null}
 
-      {/* <div className="area">
+      <div className="area">
           <div className="title">檔案大小限制</div>
           <input
             type="number"
@@ -302,7 +311,7 @@ export default (props: Props) => {
             value={sizeLimit}
             min={0.2}
           /> <div className="unit">MB</div>
-        </div> */}
+        </div>
       <button onClick={()=>handleFileResize()}>轉換</button>
     </div>
   );
