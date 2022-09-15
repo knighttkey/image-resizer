@@ -172,7 +172,12 @@ export default (props: Props) => {
         // var filename = `${obj.fileName}-${index + 1}.${format}`;
         let fileNameFragment = obj.fileName.split(".");
         let originalFilenameExtension = fileNameFragment[fileNameFragment.length-1]
-        let filename = `${obj.fileName.replace(originalFilenameExtension, format)}`;
+        let filename = '';
+        if(renameRule === 'initial') {
+          filename = `${obj.fileName.replace(originalFilenameExtension, format)}`;
+        } else if(renameRule === 'custom') {
+          filename = `${customName}-${index + 1}.${format}`;
+        }
         JSZipUtils.getBinaryContent(
           obj.blobUrl,
           function (err: any, data: ArrayBuffer) {
