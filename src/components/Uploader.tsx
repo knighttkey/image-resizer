@@ -29,7 +29,7 @@ export default (props: Props) => {
   const [qualityMenuShow, setQualityMenuShow] = useState<Boolean>(false);
   const [formatMenuShow, setFormatMenuShow] = useState<Boolean>(false);
   const [ruleMenuShow, setRuleMenuShow] = useState<Boolean>(false);
-  const [sizeLimit, setSizeLimit] = useState<number>(0.5);
+  const [sizeLimit, setSizeLimit] = useState<number>(10);
   const [imageWidthRatio, setImageWidthRatio] = useState<number>(1);
 
   const roundTo = ( num:number, decimal:number ) => { 
