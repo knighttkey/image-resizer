@@ -291,7 +291,7 @@ export default (props: Props) => {
             min={0.1}
           /> <div className="unit">MB</div>
         </div>
-      <button onClick={()=>handleFileResize()}>轉換</button>
+      <button className={`execute ${fileList.length?'must_bounce':''}`} onClick={()=>handleFileResize()}>轉換</button>
     </div>
   );
 };
