@@ -217,15 +217,19 @@ export default (props: Props) => {
     <div className="uploader_container">
       <div className="area file_picker_area">
         <div className="title">選擇圖片</div>
-        <input
-          className="file_picker"
-          type="file"
-          id="files"
-          name="files"
-          multiple={true}
-          accept="image/*"
-          onChange={(evt) => handleFileSelect(evt)}
-        />
+        <div className="upload_wrap">
+          <input
+            className="file_picker"
+            type="file"
+            id="files"
+            name="files"
+            multiple={true}
+            accept="image/*"
+            onChange={(evt) => handleFileSelect(evt)}
+          />
+          <div className="upload_btn">選擇</div>
+
+        </div>
       </div>
       <div className="area zip_file_name_area">
         <div className="title">壓縮檔名稱</div>
