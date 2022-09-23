@@ -12,12 +12,14 @@
     "axios": "^0.27.2",
     "jszip": "^3.10.1",
     "jszip-utils": "^0.1.0",
+    "ramda": "^0.28.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "sass": "^1.54.8",
     "save-as": "^0.1.8"
   },
   "devDependencies": {
+    "@types/ramda": "^0.28.15",
     "@types/react": "^18.0.17",
     "@types/react-dom": "^18.0.6",
     "@vitejs/plugin-react": "^2.1.0",
