@@ -30,8 +30,6 @@
           position: absolute;
           left: 0;
           top: 0;
-          cursor: pointer;
-          z-index: 3;
         }
         .upload_btn {
           width: 60px;
@@ -46,9 +44,13 @@
           // align-items: center;
           line-height: 32px;
           color: rgb(41, 43, 59);
-          // pointer-events: none;÷
-          // cursor: pointer;
+          cursor: pointer;
           z-index: 1;
+          transition: .3s;
+          &:hover {
+            background-color: #333;
+            color:#fff;
+          }
         }
       }
       input[type="number"],

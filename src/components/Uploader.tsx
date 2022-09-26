@@ -27,6 +27,7 @@ interface FileWithRatio extends File {
 
 export default (props: Props) => {
   const {} = props;
+  const uploadRef = useRef<HTMLInputElement>(null);
   const [fileList, setFileList] = useState<FileWithRatio[]>([]);
   const [zipName, setZipName] = useState<string>("zipFile");
   const [imageQuality, setImageQuality] = useState<number>(1);
@@ -382,6 +383,11 @@ export default (props: Props) => {
     setHasDownloaded(true);
   }
 
+  const handleClickUpload = () => {
+    if(!uploadRef || !uploadRef.current) return;
+    uploadRef.current.click()
+  }
+
   return (
     <div className="main_container">
       <div className="uploader_container">
@@ -396,8 +402,9 @@ export default (props: Props) => {
               multiple={true}
               accept="image/*"
               onChange={(evt) => handleFileSelect(evt)}
+              ref={uploadRef}
             />
-            <div className="upload_btn">選擇</div>
+            <div className="upload_btn" onClick={()=>handleClickUpload()}>選擇</div>
           </div>
         </div>
         <div className="area zip_file_name_area">
