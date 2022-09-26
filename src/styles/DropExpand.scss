@@ -23,7 +23,7 @@
       display: flex;
       // display: flex;
       .default_area {
-        min-width: 60px;
+        width: 60px;
         height: 30px;
         background-color: #c7c7c7;
         color: rgb(36, 37, 56);
@@ -37,6 +37,15 @@
         line-height: 30px;
         border-radius: 5px;
         user-select: none;
+        transition:.3s;
+        &:hover {
+          background-color: #333;
+          color:#fff;
+        }
+        &.disable {
+          opacity: 0.5;
+          pointer-events: none;
+        }
         .icon_area {
           // width: 30px;
           height: 24px;
@@ -95,6 +104,7 @@
           display: flex;
           align-items: center;
           justify-content: center;
+          color:#333;
           &:hover {
             background-color: #333;
             color: #fff;
@@ -105,6 +115,10 @@
           &.current_item {
             background-color: #5c6269;
             color: #fff;
+          }
+          &.disable {
+            opacity: 0.5;
+            pointer-events: none;
           }
         }
         &::-webkit-scrollbar {

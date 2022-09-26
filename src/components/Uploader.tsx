@@ -43,7 +43,7 @@ export default (props: Props) => {
   const [converting, setConverting] = useState<Boolean>(false);
   const [hasConverted, setHasConverted] = useState<Boolean>(false);
   const [hasDownloaded, setHasDownloaded] = useState<Boolean>(false);
-  console.log("filePack", filePack);
+  // console.log("filePack", filePack);
 
   const roundTo = (num: number, decimal: number) => {
     return (
@@ -106,7 +106,7 @@ export default (props: Props) => {
             );
             canvas.toBlob(
               function (blob: any) {
-                console.log("blob", blob);
+                // console.log("blob", blob);
                 resolve({
                   fileName: file.name,
                   imageUrl: URL.createObjectURL(blob),
@@ -120,7 +120,7 @@ export default (props: Props) => {
           });
         })
         .then((imageObj: any) => {
-          console.log("imageObj", imageObj);
+          // console.log("imageObj", imageObj);
           return new Promise(function (resolve, reject) {
             let scaledImg = new Image();
 
@@ -146,10 +146,20 @@ export default (props: Props) => {
   }
   const handleFileSelect = async (evt: any) => {
     var eventfileList = [...evt.target.files];
-    console.log("eventfileList", eventfileList);
-    eventfileList.forEach((fileItem) => {
+    // console.log("eventfileList", eventfileList);
+    eventfileList.forEach((fileItem, fileIndex) => {
       let originPreview = URL.createObjectURL(fileItem);
       fileItem.originPreview = originPreview;
+
+      let finalName = "";
+      if (renameRule === "custom") {
+        finalName = customName
+          ? `${customName}-${fileIndex + 1}.${format}`
+          : `image-${fileIndex + 1}.${format}`;
+      } else {
+        finalName = fileItem.name;
+      }
+      fileItem.customName = finalName;
     });
 
     setFileList(eventfileList);
@@ -239,13 +249,13 @@ export default (props: Props) => {
         recommend.quality,
         recommend.ratio
       );
-      console.log("fileRes", fileRes);
+      // console.log("fileRes", fileRes);
       let percent = (eachIndex + 1) / fileList.length;
-      console.log("eachIndex", eachIndex);
-      console.log("eachIndex+1", eachIndex + 1);
-      console.log("fileList.length", fileList.length);
-      console.log("percent", percent);
-      console.log("完成一個", eachIndex, eachFile.name);
+      // console.log("eachIndex", eachIndex);
+      // console.log("eachIndex+1", eachIndex + 1);
+      // console.log("fileList.length", fileList.length);
+      // console.log("percent", percent);
+      // console.log("完成一個", eachIndex, eachFile.name);
 
       let tempFileList = [...fileList];
       let index = tempFileList.indexOf(eachFile);
@@ -272,11 +282,11 @@ export default (props: Props) => {
     var zip = new JSZip();
     var count = 0;
     var zipFilename = `${zipName}.zip`;
-    console.log("results", results);
+    // console.log("results", results);
 
     results.forEach((item, index) => {
       return item.then((obj: any) => {
-        console.log("-----------------------------obj", obj);
+        // console.log("-----------------------------obj", obj);
         // var filename = `${obj.fileName}-${index + 1}.${format}`;
         let fileNameFragment = obj.fileName.split(".");
         let originalFilenameExtension =
@@ -300,7 +310,7 @@ export default (props: Props) => {
             count++;
             if (count == results.length) {
               zip.generateAsync({ type: "blob" }).then(function (content) {
-                console.log("content", content);
+                // console.log("content", content);
                 setFilePack(content);
                 setConverting(false);
                 // saveAs(content, zipFilename);
@@ -313,23 +323,31 @@ export default (props: Props) => {
     });
   };
 
+  // const qualityList = [
+  //   "0.1",
+  //   "0.2",
+  //   "0.3",
+  //   "0.4",
+  //   "0.5",
+  //   "0.6",
+  //   "0.7",
+  //   "0.8",
+  //   "0.9",
+  //   "1.0",
+  // ];
   const qualityList = [
     "0.1",
-    "0.2",
-    "0.3",
-    "0.4",
+    "0.25",
     "0.5",
-    "0.6",
-    "0.7",
-    "0.8",
-    "0.9",
+    "0.75",
     "1.0",
   ];
   const changeQuality = (item: number) => {
     setImageQuality(item);
     setQualityMenuShow(false);
   };
-  const formatList = ["jpeg", "png", "webp"];
+  // const formatList = ["jpeg", "png", "webp"];
+  const formatList = ["jpeg", "webp"];
   const changeFormat = (item: string) => {
     setFormat(item);
     setFormatMenuShow(false);
@@ -377,16 +395,16 @@ export default (props: Props) => {
 
   const downloadZip = () => {
     var zipFilename = `${zipName}.zip`;
-    
+
     saveAs(filePack, zipFilename);
     setHasConverted(false);
     setHasDownloaded(true);
-  }
+  };
 
   const handleClickUpload = () => {
-    if(!uploadRef || !uploadRef.current) return;
-    uploadRef.current.click()
-  }
+    if (!uploadRef || !uploadRef.current) return;
+    uploadRef.current.click();
+  };
 
   return (
     <div className="main_container">
@@ -404,15 +422,21 @@ export default (props: Props) => {
               onChange={(evt) => handleFileSelect(evt)}
               ref={uploadRef}
             />
-            <div className="upload_btn" onClick={()=>handleClickUpload()}>選擇</div>
+            <div
+              className={`upload_btn ${converting ? "disable" : ""}`}
+              onClick={() => handleClickUpload()}
+            >
+              選擇
+            </div>
           </div>
         </div>
         <div className="area zip_file_name_area">
           <div className="title">壓縮檔名稱</div>
           <input
             type="text"
-            className="file_name"
+            className={`file_name ${converting ? "disable" : ""}`}
             onChange={(e) => setZipName(e.target.value)}
+            spellCheck={false}
             value={zipName}
           />
         </div>
@@ -425,6 +449,9 @@ export default (props: Props) => {
             defaultValue={imageQuality}
             menuList={qualityList}
             action={changeQuality}
+            defaultAreaSty={{ width: 28, fontSize: 14 }}
+            eachItemSty={{ width: 28, fontSize: 13 }}
+            disable={converting ? true : false}
           ></DropExpand>
         </div>
         <div className="area">
@@ -435,6 +462,7 @@ export default (props: Props) => {
             defaultValue={format}
             menuList={formatList}
             action={changeFormat}
+            disable={converting ? true : false}
           ></DropExpand>
         </div>
         <div className="area">
@@ -445,6 +473,7 @@ export default (props: Props) => {
             defaultValue={renameRule}
             menuList={ruleList}
             action={changeRule}
+            disable={converting ? true : false}
           ></DropExpand>
         </div>
         {renameRule === "custom" ? (
@@ -452,19 +481,20 @@ export default (props: Props) => {
             <div className="title">自定義檔名</div>
             <input
               type="text"
-              className="custom_image_name"
+              className={`custom_image_name ${converting ? "disable" : ""}`}
               onChange={(e) => handleChangeCustomName(e)}
               value={customName}
+              spellCheck={false}
               placeholder={`fileName-1, fileName-2...`}
             />
           </div>
         ) : null}
 
         <div className="area file_size_limit_area">
-          <div className="title">檔案大小限制</div>
+          <div className="title">大小限制</div>
           <input
             type="number"
-            className="file_size_limit_input"
+            className={`file_size_limit_input ${converting ? "disable" : ""}`}
             onChange={(e) => setSizeLimit(Number(e.target.value))}
             value={sizeLimit}
             step={0.1}
@@ -472,15 +502,23 @@ export default (props: Props) => {
           />{" "}
           <div className="unit">MB</div>
         </div>
-        <div className="btn_area">
+        <div className={`btn_area ${renameRule==='custom'?'custom_choice':''}`}>
           <div
-            className={`btn execute ${fileList.length && !hasConverted && !hasDownloaded ? "must_bounce" : "disable"}`}
+            className={`btn execute ${
+              fileList.length && !hasConverted && !hasDownloaded
+                ? "must_bounce"
+                : "disable"
+            }`}
             onClick={() => handleFileResize()}
           >
             轉換
           </div>
           <div
-            className={`btn download ${hasConverted && !hasDownloaded ? "must_bounce" : "disable"}`}
+            className={`btn download ${
+              hasConverted && !hasDownloaded && !converting
+                ? "must_bounce"
+                : "disable"
+            }`}
             onClick={() => downloadZip()}
           >
             下載Ｚip
@@ -498,15 +536,19 @@ export default (props: Props) => {
             } else {
               finalName = item.name;
             }
+
+            let lastDotIndex = finalName.lastIndexOf(".")
+            let purefileName = finalName.substring(0, lastDotIndex);
+  
             return (
               <div className="each_file" key={index}>
-                {/* <div className={`thumbnail ${item.imageUrl ? '':'no_image'}`} style={{backgroundImage:`url(${item.imageUrl?item.imageUrl:'images/image.svg'})`}}></div> */}
+                <div className="file_no">{index+1}</div>
                 <div
                   className={`thumbnail ${item.imageUrl ? "" : "no_image"}`}
                   style={{ backgroundImage: `url(${item.originPreview})` }}
                 ></div>
-                <div className="file_name">{finalName}</div>
-                {/* <div className="file_name">{item.customName}</div> */}
+                <div className="file_name">{purefileName}</div>
+                <div className="file_format">{format}</div>
                 <div className="file_process">
                   <div
                     className={`progress_bar show`}
