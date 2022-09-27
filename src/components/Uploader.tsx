@@ -335,13 +335,7 @@ export default (props: Props) => {
   //   "0.9",
   //   "1.0",
   // ];
-  const qualityList = [
-    "0.1",
-    "0.25",
-    "0.5",
-    "0.75",
-    "1.0",
-  ];
+  const qualityList = ["0.1", "0.25", "0.5", "0.75", "1.0"];
   const changeQuality = (item: number) => {
     setImageQuality(item);
     setQualityMenuShow(false);
@@ -408,169 +402,179 @@ export default (props: Props) => {
 
   return (
     <div className="main_container">
-      <div className="uploader_container">
-        <div className="area file_picker_area">
-          <div className="title">選擇圖片</div>
-          <div className="upload_wrap">
+      <div className={`uploader_container ${converting ? "show3d" : ""}`}>
+        <div className="front">
+          <div className="area file_picker_area">
+            <div className="title">選擇圖片</div>
+            <div className="upload_wrap">
+              <input
+                className="file_picker"
+                type="file"
+                id="files"
+                name="files"
+                multiple={true}
+                accept="image/*"
+                onChange={(evt) => handleFileSelect(evt)}
+                ref={uploadRef}
+              />
+              <div
+                className={`upload_btn ${converting ? "disable" : ""}`}
+                onClick={() => handleClickUpload()}
+              >
+                選擇
+              </div>
+            </div>
+          </div>
+          <div className="area zip_file_name_area">
+            <div className="title">壓縮檔名稱</div>
             <input
-              className="file_picker"
-              type="file"
-              id="files"
-              name="files"
-              multiple={true}
-              accept="image/*"
-              onChange={(evt) => handleFileSelect(evt)}
-              ref={uploadRef}
+              type="text"
+              className={`file_name ${converting ? "disable" : ""}`}
+              onChange={(e) => setZipName(e.target.value)}
+              spellCheck={false}
+              value={zipName}
             />
+          </div>
+
+          <div className="area">
+            <div className="title">畫質</div>
+            <DropExpand
+              showMenu={qualityMenuShow}
+              setShowMenu={setQualityMenuShow}
+              defaultValue={imageQuality}
+              menuList={qualityList}
+              action={changeQuality}
+              defaultAreaSty={{ width: 28, fontSize: 14 }}
+              eachItemSty={{ width: 28, fontSize: 13 }}
+              disable={converting ? true : false}
+            ></DropExpand>
+          </div>
+          <div className="area">
+            <div className="title">圖片格式</div>
+            <DropExpand
+              showMenu={formatMenuShow}
+              setShowMenu={setFormatMenuShow}
+              defaultValue={format}
+              menuList={formatList}
+              action={changeFormat}
+              disable={converting ? true : false}
+            ></DropExpand>
+          </div>
+          <div className="area">
+            <div className="title">命名規則</div>
+            <DropExpand
+              showMenu={ruleMenuShow}
+              setShowMenu={setRuleMenuShow}
+              defaultValue={renameRule}
+              menuList={ruleList}
+              action={changeRule}
+              disable={converting ? true : false}
+            ></DropExpand>
+          </div>
+          {renameRule === "custom" ? (
+            <div className="area">
+              <div className="title">自定義檔名</div>
+              <input
+                type="text"
+                className={`custom_image_name ${converting ? "disable" : ""}`}
+                onChange={(e) => handleChangeCustomName(e)}
+                value={customName}
+                spellCheck={false}
+                placeholder={`fileName-1, fileName-2...`}
+              />
+            </div>
+          ) : null}
+
+          <div className="area file_size_limit_area">
+            <div className="title">大小限制</div>
+            <input
+              type="number"
+              className={`file_size_limit_input ${converting ? "disable" : ""}`}
+              onChange={(e) => setSizeLimit(Number(e.target.value))}
+              value={sizeLimit}
+              step={0.1}
+              min={0.1}
+            />{" "}
+            <div className="unit">MB</div>
+          </div>
+          <div
+            className={`btn_area ${
+              renameRule === "custom" ? "custom_choice" : ""
+            }`}
+          >
             <div
-              className={`upload_btn ${converting ? "disable" : ""}`}
-              onClick={() => handleClickUpload()}
+              className={`btn execute ${
+                fileList.length && !hasConverted && !hasDownloaded
+                  ? "must_bounce"
+                  : "disable"
+              }`}
+              onClick={() => handleFileResize()}
             >
-              選擇
+              轉換
+            </div>
+            <div
+              className={`btn download ${
+                hasConverted && !hasDownloaded && !converting
+                  ? "must_bounce"
+                  : "disable"
+              }`}
+              onClick={() => downloadZip()}
+            >
+              下載Ｚip
             </div>
           </div>
         </div>
-        <div className="area zip_file_name_area">
-          <div className="title">壓縮檔名稱</div>
-          <input
-            type="text"
-            className={`file_name ${converting ? "disable" : ""}`}
-            onChange={(e) => setZipName(e.target.value)}
-            spellCheck={false}
-            value={zipName}
-          />
-        </div>
-
-        <div className="area">
-          <div className="title">畫質</div>
-          <DropExpand
-            showMenu={qualityMenuShow}
-            setShowMenu={setQualityMenuShow}
-            defaultValue={imageQuality}
-            menuList={qualityList}
-            action={changeQuality}
-            defaultAreaSty={{ width: 28, fontSize: 14 }}
-            eachItemSty={{ width: 28, fontSize: 13 }}
-            disable={converting ? true : false}
-          ></DropExpand>
-        </div>
-        <div className="area">
-          <div className="title">圖片格式</div>
-          <DropExpand
-            showMenu={formatMenuShow}
-            setShowMenu={setFormatMenuShow}
-            defaultValue={format}
-            menuList={formatList}
-            action={changeFormat}
-            disable={converting ? true : false}
-          ></DropExpand>
-        </div>
-        <div className="area">
-          <div className="title">命名規則</div>
-          <DropExpand
-            showMenu={ruleMenuShow}
-            setShowMenu={setRuleMenuShow}
-            defaultValue={renameRule}
-            menuList={ruleList}
-            action={changeRule}
-            disable={converting ? true : false}
-          ></DropExpand>
-        </div>
-        {renameRule === "custom" ? (
-          <div className="area">
-            <div className="title">自定義檔名</div>
-            <input
-              type="text"
-              className={`custom_image_name ${converting ? "disable" : ""}`}
-              onChange={(e) => handleChangeCustomName(e)}
-              value={customName}
-              spellCheck={false}
-              placeholder={`fileName-1, fileName-2...`}
-            />
-          </div>
-        ) : null}
-
-        <div className="area file_size_limit_area">
-          <div className="title">大小限制</div>
-          <input
-            type="number"
-            className={`file_size_limit_input ${converting ? "disable" : ""}`}
-            onChange={(e) => setSizeLimit(Number(e.target.value))}
-            value={sizeLimit}
-            step={0.1}
-            min={0.1}
-          />{" "}
-          <div className="unit">MB</div>
-        </div>
-        <div className={`btn_area ${renameRule==='custom'?'custom_choice':''}`}>
-          <div
-            className={`btn execute ${
-              fileList.length && !hasConverted && !hasDownloaded
-                ? "must_bounce"
-                : "disable"
-            }`}
-            onClick={() => handleFileResize()}
-          >
-            轉換
-          </div>
-          <div
-            className={`btn download ${
-              hasConverted && !hasDownloaded && !converting
-                ? "must_bounce"
-                : "disable"
-            }`}
-            onClick={() => downloadZip()}
-          >
-            下載Ｚip
-          </div>
-        </div>
+        <div className={`border`}></div>
       </div>
-      <div className="file_list_container">
-        <div className="solid_wrap">
-          {fileList.map((item, index) => {
-            let finalName = "";
-            if (renameRule === "custom") {
-              finalName = item.customName
-                ? item.customName
-                : `${index + 1}.${format}`;
-            } else {
-              finalName = item.name;
-            }
+      <div className={`file_list_container ${converting ? "show3d" : ""}`}>
+        <div className="front">
+          <div className="solid_wrap">
+            {fileList.map((item, index) => {
+              let finalName = "";
+              if (renameRule === "custom") {
+                finalName = item.customName
+                  ? item.customName
+                  : `${index + 1}.${format}`;
+              } else {
+                finalName = item.name;
+              }
 
-            let lastDotIndex = finalName.lastIndexOf(".")
-            let purefileName = finalName.substring(0, lastDotIndex);
-  
-            return (
-              <div className="each_file" key={index}>
-                <div className="file_no">{index+1}</div>
-                <div
-                  className={`thumbnail ${item.imageUrl ? "" : "no_image"}`}
-                  style={{ backgroundImage: `url(${item.originPreview})` }}
-                ></div>
-                <div className="file_name">{purefileName}</div>
-                <div className="file_format">{format}</div>
-                <div className="file_process">
+              let lastDotIndex = finalName.lastIndexOf(".");
+              let purefileName = finalName.substring(0, lastDotIndex);
+
+              return (
+                <div className="each_file" key={index}>
+                  <div className="file_no">{index + 1}</div>
                   <div
-                    className={`progress_bar show`}
-                    style={{ width: item.ratio ? item.ratio * 100 : 0 + "%" }}
+                    className={`thumbnail ${item.imageUrl ? "" : "no_image"}`}
+                    style={{ backgroundImage: `url(${item.originPreview})` }}
                   ></div>
+                  <div className="file_name">{purefileName}</div>
+                  <div className="file_format">{format}</div>
+                  <div className="file_process">
+                    <div
+                      className={`progress_bar show`}
+                      style={{ width: item.ratio ? item.ratio * 100 : 0 + "%" }}
+                    ></div>
+                  </div>
+                  <div
+                    className={`single_download_btn ${
+                      item.imageUrl ? "" : "disable"
+                    }`}
+                    onClick={() =>
+                      item.imageUrl
+                        ? downloadThisImg(item.imageUrl, finalName)
+                        : null
+                    }
+                  >
+                    下載
+                  </div>
                 </div>
-                <div
-                  className={`single_download_btn ${
-                    item.imageUrl ? "" : "disable"
-                  }`}
-                  onClick={() =>
-                    item.imageUrl
-                      ? downloadThisImg(item.imageUrl, finalName)
-                      : null
-                  }
-                >
-                  下載
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
+        <div className={`border`}></div>
       </div>
     </div>
   );
